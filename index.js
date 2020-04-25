@@ -12,13 +12,12 @@ app.use(bodyParser.json());
 const uri = process.env.DB_PATH;
 
 
-let client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
+const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
 
 
 app.get("/products", (req, res) => {
 
-  client = new MongoClient(uri, { useNewUrlParser: true });
-
+  const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
   client.connect(err => {
 
     const collection = client.db("store").collection("products");
@@ -26,16 +25,67 @@ app.get("/products", (req, res) => {
     collection.find().limit(10).toArray((err, documents) => {
       if (err) {
         res.status(400).send({ message: err })
+        console.log(err)
       } else {
 
         res.send(documents);
+        console.log("done")
       }
 
     });
-    console.log("Database connected...");
-    client.close();
+    
+    //client.close();
   });
 })
+
+app.get("/product/:key", (req, res) => {
+  const key = req.params.key;
+
+  const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
+  client.connect(err => {
+
+    const collection = client.db("store").collection("products");
+
+    collection.find({key}).toArray((err, documents) => {
+        if(err){
+          console.log(err)
+          res.status(500).send({message:err})
+        }else{
+          res.send(documents[0]);
+        }
+    });
+
+     //client.close();
+  });
+  
+})
+
+
+app.post("/getProductKey", (req, res) => {
+  
+  const productKeys = req.body
+  console.log(productKeys);
+  const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
+  client.connect(err => {
+
+    const collection = client.db("store").collection("products");
+
+    collection.find({key:{$in: productKeys}}).toArray((err, documents) => {
+        if(err){
+          console.log(err)
+          res.status(500).send({message:err})
+        }else{
+          res.send(documents);
+        }
+    });
+
+     //client.close();
+  });
+  
+})
+
+
+
 
 app.post("/addProduct", (req, res) => {
   const product = req.body;
@@ -44,22 +94,46 @@ app.post("/addProduct", (req, res) => {
   client.connect(err => {
     const collection = client.db("store").collection("products");
 
-    collection.insertOne(product, (err, result) => {
+    collection.insert(product, (err, result) => {
       if (err) {
         res.status(500).send({ message: err })
       } else {
         console.log("successfully inserted", result);
         const one = result.ops[0];
-        res.send(one);
       }
 
     });
     console.log("Database connected...");
-    client.close();
+    //client.close();
   });
 
 
 })
 
-const port = process.env.PORT || 7000;
-app.listen(port, () => console.log("Listening Port 4200"));
+app.post("/placeOrder", (req, res) => {
+  const orderDetails = req.body;
+  orderDetails.orderDate = new Date();
+  console.log(orderDetails)
+  client.connect(err => {
+    const collection = client.db("store").collection("orders");
+
+    collection.insertOne(orderDetails, (err, result) => {
+      if (err) {
+        res.status(500).send({ message: err })
+      } else {
+        console.log("successfully inserted", result);
+      }
+
+    });
+    
+    //client.close();
+  });
+
+
+})
+
+
+
+
+
+app.listen(4200, () => console.log("Listening Port 4200"));
