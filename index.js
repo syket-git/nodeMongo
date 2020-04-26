@@ -22,7 +22,7 @@ app.get("/products", (req, res) => {
 
     const collection = client.db("store").collection("products");
 
-    collection.find().limit(10).toArray((err, documents) => {
+    collection.find().limit(30).toArray((err, documents) => {
       if (err) {
         res.status(400).send({ message: err })
         console.log(err)
@@ -37,6 +37,37 @@ app.get("/products", (req, res) => {
     //client.close();
   });
 })
+
+
+app.get("/orders", (req, res) => {
+
+  const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
+  client.connect(err => {
+
+    const collection = client.db("store").collection("orders");
+
+    collection.find().toArray((err, documents) => {
+      if (err) {
+        res.status(400).send({ message: err })
+        console.log(err)
+      } else {
+
+        res.send(documents);
+        console.log("done")
+      }
+
+    });
+
+    //client.close();
+  });
+})
+
+
+
+
+
+
+
 
 app.get("/product/:key", (req, res) => {
   const key = req.params.key;
