@@ -33,7 +33,7 @@ app.get("/products", (req, res) => {
       }
 
     });
-    
+
     //client.close();
   });
 })
@@ -46,23 +46,23 @@ app.get("/product/:key", (req, res) => {
 
     const collection = client.db("store").collection("products");
 
-    collection.find({key}).toArray((err, documents) => {
-        if(err){
-          console.log(err)
-          res.status(500).send({message:err})
-        }else{
-          res.send(documents[0]);
-        }
+    collection.find({ key }).toArray((err, documents) => {
+      if (err) {
+        console.log(err)
+        res.status(500).send({ message: err })
+      } else {
+        res.send(documents[0]);
+      }
     });
 
-     //client.close();
+    //client.close();
   });
-  
+
 })
 
 
 app.post("/getProductKey", (req, res) => {
-  
+
   const productKeys = req.body
   console.log(productKeys);
   const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
@@ -70,18 +70,18 @@ app.post("/getProductKey", (req, res) => {
 
     const collection = client.db("store").collection("products");
 
-    collection.find({key:{$in: productKeys}}).toArray((err, documents) => {
-        if(err){
-          console.log(err)
-          res.status(500).send({message:err})
-        }else{
-          res.send(documents);
-        }
+    collection.find({ key: { $in: productKeys } }).toArray((err, documents) => {
+      if (err) {
+        console.log(err)
+        res.status(500).send({ message: err })
+      } else {
+        res.send(documents);
+      }
     });
 
-     //client.close();
+    //client.close();
   });
-  
+
 })
 
 
@@ -125,7 +125,7 @@ app.post("/placeOrder", (req, res) => {
       }
 
     });
-    
+
     //client.close();
   });
 
@@ -135,5 +135,6 @@ app.post("/placeOrder", (req, res) => {
 
 
 
+const port = process.env.PORT || 4500;
 
-app.listen(4200, () => console.log("Listening Port 4200"));
+app.listen(port, () => console.log("Listening Port 4200"));
